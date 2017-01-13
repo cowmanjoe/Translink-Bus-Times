@@ -2,3 +2,5 @@
 1484279041874	Rename local variable 'stopNumberColumn'
 1484279048946	Rename local variable 'expectedTimeColumn'
 1484297214821	Rename field 'apiKey'
+1484342512833	Rename local variable 'refreshButton'
+1484344285232	Rename method 'updateData'

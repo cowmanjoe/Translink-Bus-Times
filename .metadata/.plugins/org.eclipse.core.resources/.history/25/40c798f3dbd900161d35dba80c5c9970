@@ -1,0 +1,71 @@
+package translink;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+public class ArrivalTable extends TableView {
+	
+	private ObservableList<Arrival> arrivals; 
+	
+	// map with stop number as key and list of associated route numbers 
+	// if list is empty then search all 
+	private Map<Integer, List<Integer>> searches; 
+	
+	public ArrivalTable() { 
+		setEditable(true);
+		arrivals = FXCollections.observableArrayList(); 
+		
+		TableColumn stopNumberCol = new TableColumn("Stop Number"); 
+		stopNumberCol.setMinWidth(100); 
+		stopNumberCol.setCellValueFactory(new PropertyValueFactory<Arrival, Integer>("stopNumber"));
+		
+		TableColumn routeNumberCol = new TableColumn("Route Number"); 
+		routeNumberCol.setMinWidth(100);; 
+		routeNumberCol.setCellValueFactory(new PropertyValueFactory<Arrival, Integer>("routeNumber"));
+		
+		TableColumn timeCol = new TableColumn("Expected Time"); 
+		timeCol.setMinWidth(100);
+		timeCol.setCellValueFactory(new PropertyValueFactory<Arrival, String>("time"));
+		
+		setItems(arrivals);
+		getColumns().addAll(stopNumberCol, routeNumberCol, timeCol); 
+	}
+	
+	
+	public void addArrivals(int stop) { 
+		// TODO: get arrivals from datafetcher, add to arrivals observable list and add to searches map 
+		List<Arrival> as = DataFetcher.getArrivals(stop); 
+		arrivals.addAll(as); 
+		searches.put(stop, new ArrayList<Integer>()); 
+	}
+	
+	public void addArrivals(int stop, int route) { 
+		List<Arrival> as = DataFetcher.getArrivals(stop, route); 
+		arrivals.addAll(as); 
+		List<Integer> routes = searches.get(stop); 
+		if (routes == null) { 
+			routes = new ArrayList<Integer>(); 
+			routes.add(route); 
+			searches.put(stop, routes); 
+		}
+		else {
+			routes.add(route); 
+		}
+	}
+	
+	public void clearArrivals() { 
+		arrivals.clear(); 
+		searches.clear(); 
+	}
+	
+	public void refreshArrivals() { 
+		//TODO: fetch data using the searches map to retrieve latest data
+	}
+}
