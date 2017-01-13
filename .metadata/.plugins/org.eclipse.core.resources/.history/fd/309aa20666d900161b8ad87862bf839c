@@ -1,0 +1,98 @@
+package translink;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.*;
+import java.util.ArrayList;
+import java.util.List; 
+
+
+
+public class DataFetcher {
+	private static final String apiKey = "gmSNagac7UUqdirk3bFj"; 
+	
+	public List<Arrival> getArrivals(int stop) { 
+		//TODO: stub 
+		return new ArrayList<Arrival>(); 
+	}
+	
+	public List<Arrival> getArrivals(int stop, int route) { 
+		List<LocalTime> lts = getLastTimes(stop, route); 
+		List<Arrival> ans = new ArrayList<Arrival>(); 
+		
+		for (LocalTime lt : lts) { 
+			Arrival a = new Arrival(lt, stop, route); 
+			ans.add(a); 
+		}
+		
+		return ans; 
+		
+	}
+	
+	
+	public static List<LocalTime> getLastTimes(int stop, int route) { 
+		List<LocalTime> ans = new ArrayList<LocalTime>(); 
+		URL url = getURLForLastTimes(stop, route); 
+		
+		String data = getDataFromURL(url); 
+		
+		return findExpectedTimes(data); 
+	}
+	
+	private static String getDataFromURL(URL url) {
+		
+		
+		String line = ""; 
+		String temp; 
+		try { 
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream())); 
+			while((temp = in.readLine()) != null) {
+				line += temp + "\n"; 
+			}
+		} catch (IOException e) { 
+			System.out.println("Attempting to read from " + url.toString() + " caused an IOException:" + e.toString());
+			 
+		} finally {
+			return line; 
+		}
+		
+	}
+	
+	private static URL getURLForLastTimes(int stop, int route) { 
+		String url = ""; 
+		try {
+			url = "http://api.translink.ca/rttiapi/v1/stops/" + stop + "/estimates?apikey=" + apiKey + "&routeNo=" + route;
+			return new URL(url); 
+		} catch (MalformedURLException e ) { 
+			System.out.println("MalformedURLException thrown: " + e.toString() + "\nThis was the URL: " + url);
+			return null; 
+		}
+	}
+	
+	private static List<LocalTime> findExpectedTimes(String data) { 
+		List<LocalTime> ans = new ArrayList<LocalTime>();  
+		String dataSoFar = data; 
+		while(dataSoFar.contains("<ExpectedLeaveTime>")) {
+			int index = dataSoFar.indexOf("<ExpectedLeaveTime>") + "<ExpectedLeaveTime>".length(); 
+			dataSoFar = dataSoFar.substring(index); 
+			String timeString = dataSoFar.substring(0, dataSoFar.indexOf(' ')); 
+			System.out.println("First ':' at " + timeString.indexOf(':') + " and first ' ' at " + timeString.indexOf(' ')); 
+			int hour = Integer.parseInt(timeString.substring(0,timeString.indexOf(':'))); 
+			int minute = Integer.parseInt(timeString.substring(timeString.indexOf(':') + 1, timeString.indexOf('m') - 1)); 
+			LocalTime lt = LocalTime.of(hour, minute);
+			ans.add(lt); 
+		}
+		return ans; 
+	}
+	
+	
+	public static void main(String[] args) { 
+		List<LocalTime> lts = getLastTimes(50586, 4); 
+		for (LocalTime l : lts) { 
+			System.out.println(l.toString());
+		}
+	}
+}

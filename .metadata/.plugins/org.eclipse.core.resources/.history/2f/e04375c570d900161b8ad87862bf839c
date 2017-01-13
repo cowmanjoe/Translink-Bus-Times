@@ -1,0 +1,134 @@
+package translink;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map; 
+
+
+
+public class DataFetcher {
+	private static final String API_KEY = "gmSNagac7UUqdirk3bFj"; 
+	
+	public static List<Arrival> getArrivals(int stop) { 
+		List<Arrival> ans = new ArrayList<Arrival>(); 
+		Map<Integer, List<LocalTime>> lts = getLastTimes(stop); 
+		
+		for (Integer r : lts.keySet()) {
+			for (LocalTime lt : lts.get(r)) {
+				Arrival a = new Arrival(lt, stop, r); 
+				ans.add(a); 
+			}
+		}
+		
+		return ans; 
+	}
+	
+	public static List<Arrival> getArrivals(int stop, int route) { 
+		Map<Integer, List<LocalTime>> lts = getLastTimes(stop, route); 
+		List<Arrival> ans = new ArrayList<Arrival>(); 
+		
+		for (Integer r : lts.keySet()) {
+			for (LocalTime lt : lts.get(r)) {
+				Arrival a = new Arrival(lt, stop, r); 
+				ans.add(a); 
+			}
+		}
+		
+		return ans; 
+		
+	}
+	
+	private static Map<Integer, List<LocalTime>> getLastTimes(int stop) { 
+		URL url = getURLForLastTimes(stop); 
+		String data = getDataFromURL(url); 
+		
+		return findExpectedTimes(data); 
+	}
+	
+	
+	private static Map<Integer, List<LocalTime>> getLastTimes(int stop, int route) { 
+		URL url = getURLForLastTimes(stop, route); 
+		
+		String data = getDataFromURL(url); 
+		
+		return findExpectedTimes(data); 
+	}
+	
+	private static String getDataFromURL(URL url) {
+		
+		
+		String line = ""; 
+		String temp; 
+		try { 
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream())); 
+			while((temp = in.readLine()) != null) {
+				line += temp + "\n"; 
+			}
+		} catch (IOException e) { 
+			System.out.println("Attempting to read from " + url.toString() + " caused an IOException:" + e.toString());
+			 
+		} finally {
+			return line; 
+		}
+		
+	}
+	
+	private static URL getURLForLastTimes(int stop) { 
+		String url = ""; 
+		try { 
+			url = "http://api.translink.ca/rttiapi/v1/stops/" + stop + "/estimates?apikey=" + API_KEY; 
+			return new URL(url); 
+		} catch (MalformedURLException e) { 
+			System.out.println("MalformedURLException thrown: " + e.toString() + "\nThis was the URL: " + url);
+			return null; 
+		}
+	}
+	
+	private static URL getURLForLastTimes(int stop, int route) { 
+		String url = ""; 
+		try {
+			url = "http://api.translink.ca/rttiapi/v1/stops/" + stop + "/estimates?apikey=" + API_KEY + "&routeNo=" + route;
+			return new URL(url); 
+		} catch (MalformedURLException e ) { 
+			System.out.println("MalformedURLException thrown: " + e.toString() + "\nThis was the URL: " + url);
+			return null; 
+		}
+	}
+	
+	private static Map<Integer, List<LocalTime>> findExpectedTimes(String data) { 
+		Map<Integer, List<LocalTime>> ans = new HashMap<>();  
+		String dataSoFar = data; 
+		while (dataSoFar.contains("<RouteNo>")) {
+			dataSoFar = dataSoFar.substring(dataSoFar.indexOf("<RouteNo>") + "<RouteNo>".length());
+			String routeString = dataSoFar.substring(0, dataSoFar.indexOf('<'));
+			int route = Integer.parseInt(routeString); 
+			List<LocalTime> lts = new ArrayList<>(); 
+			while(dataSoFar.contains("<ExpectedLeaveTime>") && 
+					(dataSoFar.indexOf("<ExpectedLeaveTime>") < dataSoFar.indexOf("<RouteNo>")) || 
+					!dataSoFar.contains("<RouteNo>")){
+				int index = dataSoFar.indexOf("<ExpectedLeaveTime>") + "<ExpectedLeaveTime>".length(); 
+				dataSoFar = dataSoFar.substring(index); 
+				String timeString = dataSoFar.substring(0, dataSoFar.indexOf(' ')); 
+				System.out.println("First ':' at " + timeString.indexOf(':') + " and first ' ' at " + timeString.indexOf(' ')); 
+				int hour = Integer.parseInt(timeString.substring(0,timeString.indexOf(':'))); 
+				int minute = Integer.parseInt(timeString.substring(timeString.indexOf(':') + 1, timeString.indexOf('m') - 1)); 
+				LocalTime lt = LocalTime.of(hour, minute);
+				lts.add(lt); 
+			}
+			ans.put(route, lts); 
+		}
+		return ans; 
+	}
+	
+	
+	
+	
+	
+}

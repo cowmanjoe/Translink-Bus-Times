@@ -1,0 +1,29 @@
+package translink;
+
+import java.time.LocalTime;
+
+public class Arrival {
+	LocalTime time; 
+	
+	int stopNumber; 
+	int routeNumber; 
+	
+	
+	Arrival(LocalTime time, int stopNumber, int routeNumber) { 
+		this.time = time; 
+		this.stopNumber = stopNumber; 
+		this.routeNumber = routeNumber; 
+	}
+	
+	public LocalTime getTime() { 
+		return time; 
+	}
+	
+	public int getStopNumber() { 
+		return stopNumber; 
+	}
+	
+	public int getRouteNumber() { 
+		return routeNumber; 
+	}
+}
