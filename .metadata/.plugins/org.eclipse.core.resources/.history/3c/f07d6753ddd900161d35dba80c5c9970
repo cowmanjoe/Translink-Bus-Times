@@ -72,7 +72,7 @@ public class Graphics extends Application {
 		final VBox vbox = new VBox() ; 
 		vbox.setSpacing(5);
 		vbox.setPadding(new Insets(10, 0, 0, 10));
-		vbox.getChildren().addAll(label, table, stopLabel, stopField, routeLabel, routeField, addButton, refreshButton, clearButton); 
+		vbox.getChildren().addAll(label, table, stopLabel, stopField, routeLabel, routeField, addButton, clearButton); 
 		
 		((Group) scene.getRoot()).getChildren().addAll(vbox); 
 		

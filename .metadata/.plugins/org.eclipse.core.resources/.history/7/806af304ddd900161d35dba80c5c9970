@@ -1,7 +1,6 @@
 package translink;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ public class ArrivalTable extends TableView {
 	public ArrivalTable() { 
 		setEditable(true);
 		arrivals = FXCollections.observableArrayList(); 
-		searches = new HashMap<Integer, List<Integer>>(); 
 		
 		TableColumn stopNumberCol = new TableColumn("Stop Number"); 
 		stopNumberCol.setMinWidth(150); 
@@ -42,6 +40,7 @@ public class ArrivalTable extends TableView {
 	
 	
 	public void addArrivals(int stop) { 
+		// TODO: get arrivals from datafetcher, add to arrivals observable list and add to searches map 
 		List<Arrival> as = DataFetcher.getArrivals(stop); 
 		arrivals.addAll(as); 
 		searches.put(stop, new ArrayList<Integer>()); 
@@ -67,19 +66,6 @@ public class ArrivalTable extends TableView {
 	}
 	
 	public void refreshArrivals() { 
-		arrivals.clear(); 
-		for (Integer stop : searches.keySet()) System.out.println("Stop: " + stop);
-		
-		
-		for (Integer stop : searches.keySet()) { 
-			List<Integer> routes = searches.get(stop); 
-			if (routes.size() == 0) { 
-				arrivals.addAll(DataFetcher.getArrivals(stop));
-			}
-			else {
-				for (Integer route : routes) 
-					arrivals.addAll(DataFetcher.getArrivals(stop, route)); 
-			}
-		}
+		//TODO: fetch data using the searches map to retrieve latest data
 	}
 }
