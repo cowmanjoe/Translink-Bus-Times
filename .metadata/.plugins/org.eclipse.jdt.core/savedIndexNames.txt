@@ -17,4 +17,3 @@ INDEX VERSION 1.127+C:\Users\Cowan\Documents\GitHub\Translink-Bus-Times\.metadat
 1583927216.index
 3681335767.index
 2831536327.index
-936148398.index
